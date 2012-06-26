@@ -10,8 +10,8 @@ public class VideoReceiver {
 	private SurfaceView view;
 	private String token;
 	//private String address;
-	private String host;
-	private int port;
+	//private String host;
+	//private int port;
 	boolean isPlaying=false;
 	
 	VideoReaderThread reader;
@@ -21,8 +21,9 @@ public class VideoReceiver {
 	{
 		
 		
-		this.host = host;
-		this.port = videoPort;
+		//this.host = host;
+		//this.port = videoPort;
+		reader.setHostAndPort(host, videoPort);
 	}
 	
 	public VideoReceiver(SurfaceView view)
@@ -37,6 +38,7 @@ public class VideoReceiver {
 	}
 	public void setToken(String token) {
 		this.token = token;
+		reader.setToken(token);
 	}
 
 	public void startReceiveVideo()
@@ -45,16 +47,20 @@ public class VideoReceiver {
 		{
 			throw new RuntimeException("VideoReceiver started without token!");
 		}
+		reader.startWork();
+		drawer.startPlayback();
 		//view.requestRead(String.format(address, token));
 		//MjpegInputStream.read(,);
-		OnScreenLogger.setVideoIn(true);
+		//OnScreenLogger.setVideoIn(true);
 
 	}
 	
 	public void stopReceiveVideo()
 	{
 		//view.stopPlayback();
-		OnScreenLogger.setVideoIn(false);
+		reader.stopWork();
+		drawer.stopPlayback();
+		//OnScreenLogger.setVideoIn(false);
 	}
 	
 	
