@@ -1,22 +1,11 @@
 package de.mjpegsample.MjpegView;
 
-import java.io.BufferedInputStream;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import ru.glavbot.asyncHttpRequest.ConnectionManager;
 import ru.glavbot.asyncHttpRequest.ConnectionRequest;
 import ru.glavbot.asyncHttpRequest.ProcessAsyncRequestResponceProrotype;
-
-
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -100,7 +89,7 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 		public void run() {
 			try {
 				setName("VideoReceiver");
-				while (mRun && (!interrupted())) {
+				while (mRun && (! isInterrupted())) {
 
 					Bitmap bm = mIn.readMjpegFrame();
 					if(bm!=null)
@@ -164,7 +153,7 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
         mRun = false;
         initializing=false;
         boolean retry = true;
-        
+       
         while(retry) {
             try {
             	
@@ -223,71 +212,7 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
     public void setDisplayMode(int s) { displayMode = s; }
     
     
-    /*
-    private static class MJpegInputStreamConnector implements Runnable
-    {
-
-    	MJpegInputStreamConnector(String url, ConnectionResponceHandler handler)
-    	{
-    		this.url=URI.create(url);
-    		this.m_handler=handler.getNativeHandler();
-    	};
-    	 private URI url= null;
-    	 private Handler m_handler=null;
-    	 private HttpResponse res= null;
-
-    	 private static DefaultHttpClient httpClient=null;
-    	 
-    	 private DefaultHttpClient getDefaultHttpClient()
-    	 {
-    		 if(httpClient==null)
-    		 {
-    			 httpClient = new DefaultHttpClient();
-    		 }
-    		 return httpClient;
-    	 }
-    	 
-		public void run() {
-			// TODO Auto-generated method stub
-
-			if (url == null || m_handler == null)
-				throw new RuntimeException(
-						"MJpegInputStreamConnector started without thread or handler");
-
-			DefaultHttpClient client= getDefaultHttpClient();
-			//httpclient.
-			Message message;
-			try {
-				res = client.execute(new HttpGet(url));
-				AsyncRequestResponce rr = new AsyncRequestResponce(res.getStatusLine()
-						.getStatusCode(), res.getEntity().getContent(),Thread.currentThread(),null);
-				message = Message.obtain(m_handler, HttpConnection.DID_SUCCEED,
-						rr);
-			} catch (ClientProtocolException e) {
-				Log.e("", "", e);
-				message = Message
-						.obtain(m_handler, HttpConnection.DID_ERROR, new AsyncRequestResponce(600, null,Thread.currentThread(),e));
-				
-			} catch (IOException e) {
-				Log.e("", "", e);
-				message = Message
-						.obtain(m_handler, HttpConnection.DID_ERROR, new AsyncRequestResponce(600, null,Thread.currentThread(),e));
-			}
-
-			if(message.what!=HttpConnection.DID_SUCCEED)
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				Log.e("","",e1);
-				
-			}
-			m_handler.sendMessage(message);
-
-		}
-    };
    
-    */
     
     private String url;
     private boolean initializing=false;

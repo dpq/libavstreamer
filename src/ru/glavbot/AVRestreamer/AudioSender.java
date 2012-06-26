@@ -41,7 +41,7 @@ public class AudioSender extends Thread{
 	
 	private static final int CHUNK_SIZE_FLOAT = CHUNK_SIZE_BASE * SIZEOF_FLOAT;
 
-	private static final int STD_DELAY = 10000;  
+	private static final int STD_DELAY = 1000;  
       
     Object sync= new Object();
     
@@ -92,7 +92,8 @@ public class AudioSender extends Thread{
 	protected void internalStop()
 	{
 		Message msg = mChildHandler.obtainMessage(STOP_AUDIO);
-		mChildHandler.sendMessage(msg);
+		mChildHandler.removeMessages(START_AUDIO);
+		mChildHandler.sendMessageAtFrontOfQueue(msg);
 	}
 	
 	Handler mChildHandler;
@@ -124,7 +125,7 @@ public class AudioSender extends Thread{
 	            private int bufferSize;
 	            {
 					bufferSize =AudioRecord.getMinBufferSize(SAMPLE_RATE,
-	                        AudioFormat.CHANNEL_CONFIGURATION_MONO,
+	                        AudioFormat.CHANNEL_IN_MONO,
 	                        AudioFormat.ENCODING_PCM_16BIT);
 					bufferSize=bufferSize<CHUNK_SIZE_SHORTX4?CHUNK_SIZE_SHORTX4:bufferSize;
 			        is.mark(CHUNK_SIZE_FLOAT*4);
@@ -157,7 +158,8 @@ public class AudioSender extends Thread{
 
 				private void startRecord() {
 
-
+					if(!isRecording)
+						return;
 
 					if (hasMessages(START_AUDIO)) {
 						removeMessages(START_AUDIO);
@@ -184,7 +186,7 @@ public class AudioSender extends Thread{
 						
 						socket.setKeepAlive(true);
 						socket.setSoTimeout(1000);
-						socket.setSendBufferSize(CHUNK_SIZE_FLOAT+10);
+						socket.setSendBufferSize(CHUNK_SIZE_SHORTX4+10);
 						socket.setSoLinger(true, 0);
 						OutputStream s = socket.getOutputStream();
 						String ident = getToken();
@@ -240,13 +242,13 @@ public class AudioSender extends Thread{
 							if(bytes_read>0)
 							{
 								Log.v("avatar audio out","read "+String.format("%d", bytes_read)+" bytes");
-								/*byte tmp;
-								for(int j=0;j<CHUNK_SIZE_BASE;j++)
+								byte tmp;
+								for(int j=0;j<CHUNK_SIZE_BASEX4;j++)
 								{
 									tmp=audioData[j*2];
 									audioData[j*2]=audioData[j*2+1];
 									audioData[j*2+1]=tmp;
-								}*/
+								}
 								//os.write(audioData, 0, bytes_read);
 								int i;
 								is.reset();

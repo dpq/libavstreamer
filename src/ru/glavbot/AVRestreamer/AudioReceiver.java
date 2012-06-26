@@ -33,7 +33,7 @@ public class AudioReceiver extends Thread {
 
 //	private static final int CHUNK_SIZE_SHORT = CHUNK_SIZE_BASE * SIZEOF_SHORT;
 	private static final int BUFF_SIZE = CHUNK_SIZE_BASE * SIZEOF_FLOAT*2;
-	private static final int STD_DELAY = 10000;
+	private static final int STD_DELAY = 1000;
 
 
 	Object sync = new Object();
@@ -172,7 +172,7 @@ public class AudioReceiver extends Thread {
 						floatStream = new DataInputStream(socket.getInputStream());
 						String dataToGet=(eol  +eol);
 						String data="";
-						while ((!data.contains(dataToGet))&&(data.length()<1000))
+						while (!(data.contains(dataToGet)||(data.length()>=1000)||interrupted()||hasMessages(STOP_AUDIO)))
 						{
 							data+=(char)floatStream.readByte();
 						}
@@ -227,6 +227,7 @@ public class AudioReceiver extends Thread {
 				}
 				
 				private void doPlay() {
+					mChildHandler.removeMessages(PROCESS_AUDIO);
 					if (isPlaying) {
 							int dataRead;
 							
@@ -249,8 +250,8 @@ public class AudioReceiver extends Thread {
 							}
 							
 							if (dataRead > 0) {
-								Log.v("avatar audio in" ,String.format("readed %d bytes",dataRead*4));
-								player.write(shortAudioData, 0, dataRead);
+								Log.v("avatar audio in" ,String.format("readed %d bytes",dataRead*2));
+								player.write(shortAudioData, 0, dataRead*4);
 							}
 							
 							if(isPlaying)

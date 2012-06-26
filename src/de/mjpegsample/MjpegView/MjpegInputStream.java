@@ -3,8 +3,10 @@ package de.mjpegsample.MjpegView;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
+//import java.io.InputStream;
+import java.io.InterruptedIOException;
 
 import org.apache.http.HttpEntity;
 
@@ -36,12 +38,31 @@ public class MjpegInputStream extends DataInputStream {
     	super(new BufferedInputStream(in.getContent(),FRAME_MAX_LENGTH)); 
     	ent=in;
     }
-	
+
+    private byte myReadByte(DataInputStream in) throws IOException
+    {
+    	byte[] c= new byte[1];
+    	int bytesRead=0;
+    	while ((bytesRead==0)&&!(Thread.currentThread().isInterrupted ()))
+    	{
+    		bytesRead=in.read(c,0,1);
+    		if(bytesRead<0)
+    		{
+    			throw new EOFException("MjpegInputStream::myReadFully: End of underlayer stream reached");
+    		}
+    	}
+    	if(Thread.currentThread().isInterrupted ())
+    		throw new InterruptedIOException();
+    	return c[0];
+    }
+    
+    
+    
     private int getEndOfSeqeunce(DataInputStream in, byte[] sequence) throws IOException {
         int seqIndex = 0;
         byte c;
         for(int i=0; i < FRAME_MAX_LENGTH; i++) {
-            c = (byte) in.readUnsignedByte();
+            c = myReadByte(in);
             if(c == sequence[seqIndex]) {
                 seqIndex++;
                 if(seqIndex == sequence.length) return i + 1;
@@ -97,7 +118,7 @@ public class MjpegInputStream extends DataInputStream {
         int headerLen = getStartOfSequence(this, SOI_MARKER);
         reset();
         //byte[] header = new byte[headerLen];
-        readFully(buffer,0,headerLen);
+        myReadFully(buffer,0,headerLen);
         mark(JPEG_MAX_LENGTH);
         try {
             mContentLength = parseContentLength(buffer,headerLen);
@@ -108,9 +129,31 @@ public class MjpegInputStream extends DataInputStream {
         
         //byte[] frameData = new byte[mContentLength];
         //skipBytes(headerLen);
-        readFully(buffer,0,mContentLength);
+        myReadFully(buffer,0,mContentLength);
         return BitmapFactory.decodeStream(new ByteArrayInputStream(buffer));
     }
+    
+    void myReadFully(byte[] dst, int offset, int byteCount) throws IOException
+    {
+    	int toRead=byteCount;
+    	int curOffset=offset;
+    	while ((toRead>0)&&!(Thread.currentThread().isInterrupted ()))
+    	{
+    		int bytesRead=read(dst,curOffset,toRead);
+    		if(bytesRead<0)
+    		{
+    			throw new EOFException("MjpegInputStream::myReadFully: End of underlayer stream reached");
+    		}
+    		else
+    		{
+    			curOffset+=bytesRead;
+    			toRead-=bytesRead;
+    		}
+    	}
+    	if(Thread.currentThread().isInterrupted ())
+    		throw new InterruptedIOException();
+    }
+    
     
     @Override
     public void close()

@@ -1,25 +1,36 @@
 package ru.glavbot.AVRestreamer;
 
+import android.view.SurfaceView;
+
 
 //import ru.glavbot.avatarProto.OnScreenLogger;
-import de.mjpegsample.MjpegView.MjpegView;
+//import de.mjpegsample.MjpegView.MjpegView;
 
 public class VideoReceiver {
-	private MjpegView view;
+	private SurfaceView view;
 	private String token;
-	private String address;
+	//private String address;
+	private String host;
+	private int port;
 	boolean isPlaying=false;
+	
+	VideoReaderThread reader;
+	VideoDrawerThread drawer;
 	
 	public void setAddress(String host, int videoPort)
 	{
 		
-		this.address=String.format("http://%s:%d",host,videoPort)+"/restreamer?oid=%s";
+		
+		this.host = host;
+		this.port = videoPort;
 	}
 	
-	public VideoReceiver(MjpegView view)
+	public VideoReceiver(SurfaceView view)
 	{
 		this.view=view;
-		
+		drawer= new VideoDrawerThread(view);
+		reader= new VideoReaderThread();
+		reader.setDrawerHandler(drawer.getChildHandler());
 	}
 	public String getToken() {
 		return token;
@@ -34,7 +45,7 @@ public class VideoReceiver {
 		{
 			throw new RuntimeException("VideoReceiver started without token!");
 		}
-		view.requestRead(String.format(address, token));
+		//view.requestRead(String.format(address, token));
 		//MjpegInputStream.read(,);
 		OnScreenLogger.setVideoIn(true);
 
@@ -42,7 +53,7 @@ public class VideoReceiver {
 	
 	public void stopReceiveVideo()
 	{
-		view.stopPlayback();
+		//view.stopPlayback();
 		OnScreenLogger.setVideoIn(false);
 	}
 	

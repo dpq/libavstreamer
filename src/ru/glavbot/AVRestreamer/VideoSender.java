@@ -2,13 +2,13 @@ package ru.glavbot.AVRestreamer;
 
 import java.io.ByteArrayOutputStream;
 //import java.io.File;
-import java.io.DataInputStream;
+//import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 //import java.net.SocketException;
-import java.net.UnknownHostException;
+//import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,10 +20,10 @@ import java.util.List;
 
 import android.content.Context;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+//import android.graphics.Bitmap;
+//import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
-import android.graphics.Matrix;
+//import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
@@ -39,7 +39,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
+//import android.view.View;
 import android.widget.VideoView;
 import android.app.Activity;
 
@@ -191,7 +191,7 @@ public class VideoSender extends Thread {
 						
 						//int length = dat
 						
-						img.compressToJpeg(imgRect, 50, os);
+						img.compressToJpeg(imgRect, 100, os);
 						
 
 						data.unlock();
