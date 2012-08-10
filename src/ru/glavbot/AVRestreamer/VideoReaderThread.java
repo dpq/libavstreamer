@@ -34,7 +34,7 @@ public class VideoReaderThread extends Thread {
     private final byte[] EOL_MARKER = { (byte)0x0D,(byte) 0x0A };
     protected byte[] BOUNDARY = {'-','-','b','o','u','n','d','a','r','y','d','o','n','o','t','c','r','o','s','s',(byte)0x0D,(byte) 0x0A};
     private final static int HEADER_MAX_LENGTH = 100;
-    private final static int JPEG_MAX_LENGTH = 40000;
+    private final static int JPEG_MAX_LENGTH = 400000;
     private final static int FRAME_MAX_LENGTH = JPEG_MAX_LENGTH + HEADER_MAX_LENGTH;
     private int mContentLength = -1;
     private static final String  BOUNDARY_HEADER="boundary=";

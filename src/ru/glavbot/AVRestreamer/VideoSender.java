@@ -41,6 +41,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 //import android.view.View;
 import android.widget.VideoView;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 
 public class VideoSender extends Thread {
@@ -96,7 +97,7 @@ public class VideoSender extends Thread {
 		double bestFit=Double.MAX_VALUE;
 		for(int i=0; i<ps.size();i++)
 		{
-			double current = Math.sqrt(Math.pow((ps.get(i).width-800), 2)+Math.pow((ps.get(i).height-600), 2));
+			double current = Math.sqrt(Math.pow((ps.get(i).width-640), 2)+Math.pow((ps.get(i).height-480), 2));
 			if(current<bestFit)
 			{
 				bestFit=current;
@@ -174,6 +175,7 @@ public class VideoSender extends Thread {
 
 				OutputStream socketOutputStream = null;
 				
+				@SuppressLint("HandlerLeak")
 				private void processFrame(Message msg) {
 					Log.v("VideoSender","sending image to server");
 					if (isRunning&&!socket.isConnected()) {
@@ -191,7 +193,7 @@ public class VideoSender extends Thread {
 						
 						//int length = dat
 						
-						img.compressToJpeg(imgRect, 100, os);
+						img.compressToJpeg(imgRect, 25, os);
 						
 
 						data.unlock();
@@ -204,7 +206,7 @@ public class VideoSender extends Thread {
 						                              matrix, true);
 						os.reset();
 						rotated.compress(Bitmap.CompressFormat.JPEG, 100, os);*/
-						
+						Log.v(this.getClass().getName(),String.format("Content-Length: %d",os.size()));
 						String s = String.format("--boundarydonotcross" + eol
 								+ "Content-Type: image/jpeg" + eol
 								+ "Content-Length: %d" + eol + eol, os.size());
@@ -395,14 +397,14 @@ public class VideoSender extends Thread {
 
 	private void setupCamera(Camera camera) {
 		Camera.Parameters p = camera.getParameters();
-		 List<Size> formats =p.getSupportedPreviewSizes() ;
-		 List<Integer> fr=p.getSupportedPreviewFrameRates();
+	//	 List<Size> formats =p.getSupportedPreviewSizes() ;
+	//	 List<Integer> fr=p.getSupportedPreviewFrameRates();
 		p.setPreviewFormat(ImageFormat.NV21); // was nv21
 		p.setPreviewSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
 		//p.getSupportedPreviewFrameRates();
 		p.setPreviewFrameRate(NUM_FRAMES);
-		List<String> sm =p.getSupportedSceneModes();
-		List<String> fm=p.getSupportedFocusModes();
+	//	List<String> sm =p.getSupportedSceneModes();
+	//	List<String> fm=p.getSupportedFocusModes();
 		//p.setSceneMode(Camera.Parameters.SCENE_MODE_SUNSET);
 	   // p.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
 		// List<String> l = p.getSupportedColorEffects();

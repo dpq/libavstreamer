@@ -24,7 +24,7 @@ public class ConnectionRequest  {
 
 		private int processingType=0;
 		
-		private int timeout = 100000;
+		private int timeout = 10000;
 		private IProcessAsyncRequestResponse progressProcessor=null;
 		private IProcessAsyncRequestResponse answerProcessor=null;
 	
