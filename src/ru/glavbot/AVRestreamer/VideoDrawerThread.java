@@ -133,8 +133,8 @@ public class VideoDrawerThread extends Thread {
 	   	    this.setName("VideoDrawerThread");    
 	   	    mChildHandler=new Handler() {
    		        long start;
-   		        PorterDuffXfermode mode;
-   		        Paint p;
+   		        PorterDuffXfermode mode=null;
+   		        Paint p=null;
    		        private String fps;
 	   	        	
    		        public void handleMessage(Message msg) {
@@ -156,8 +156,12 @@ public class VideoDrawerThread extends Thread {
 
 	   			private void init() {
 	   				start = System.currentTimeMillis();
-	   			    mode = new PorterDuffXfermode(PorterDuff.Mode.DST_OVER);
-	   			    p = new Paint();
+	   			   
+	   				if(mode==null)
+	   					mode = new PorterDuffXfermode(PorterDuff.Mode.DST_OVER);
+	   			    
+	   			    if(p==null)
+	   			    	p = new Paint();
 	   			    fps = "";
 	   			    frameCounter = 0;
 	   			}

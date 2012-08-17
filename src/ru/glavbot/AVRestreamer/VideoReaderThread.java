@@ -235,7 +235,7 @@ public class VideoReaderThread extends Thread {
 
 		synchronized (sync) {
 			Looper.prepare();
-			setName("AudioReceiver");
+			setName("VideoReader");
 			mChildHandler = new Handler() {
 
 				Socket socket = null;
@@ -285,7 +285,7 @@ public class VideoReaderThread extends Thread {
 					try {
 						socket = new Socket(addr, port);
 						socket.setKeepAlive(true);
-						socket.setSoTimeout(10000);
+						socket.setSoTimeout(2000);
 						
 						OutputStream s = socket.getOutputStream();
 						String ident =  getToken();
@@ -354,6 +354,7 @@ public class VideoReaderThread extends Thread {
 					socket = null;
 					videoStream= null;
 					isPlaying = false;
+					drawerHandler.obtainMessage(VideoDrawerThread.DONE).sendToTarget();
 					OnScreenLogger.setVideoIn(false);
 				}
 				
