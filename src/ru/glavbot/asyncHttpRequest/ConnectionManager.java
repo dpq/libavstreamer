@@ -66,6 +66,23 @@ public class ConnectionManager {
 		}
 		startNext();
 	}
+	
+	public void clearQueue() {
+		if(runner!=null)
+		{
+			
+			runner.cancel(true);
+			runner.consumeCurrentResponceIfNeeded();
+			runner=null;
+			queue.remove(0);
+			ClientConnectionManager mgr =client.getConnectionManager();
+			mgr.closeIdleConnections(1, TimeUnit.MINUTES);
+			//client.getConnectionKeepAliveStrategy()
+			//else
+			//	throw new RuntimeException("Running task considered immortal. Kill it by throwing your tab into the trash");
+		}
+		queue.clear();
+	}
 
 	public HttpClient getClient() {
 		return client;
