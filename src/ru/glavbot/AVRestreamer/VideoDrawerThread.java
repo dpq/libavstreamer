@@ -1,6 +1,7 @@
 package ru.glavbot.AVRestreamer;
 
 
+import ru.glavbot.customLogger.AVLogger;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -55,7 +56,7 @@ public class VideoDrawerThread extends Thread {
 			}
 		} catch (InterruptedException e) {
 
-			Log.e("", "", e);
+			AVLogger.e("", "", e);
 		}
     	mSurfaceHolder=surface.getHolder();
     	mSurfaceHolder.addCallback(shc);
@@ -168,7 +169,7 @@ public class VideoDrawerThread extends Thread {
 
 	   			private void doRun(Bitmap frame) 
 	   			{
-	   				Log.v("VideoReceiver", "drawing image");
+	   				AVLogger.v("VideoReceiver", "drawing image");
 	   				if(surfaceDone) {
 	   		            Canvas c=null;
 	   					try {

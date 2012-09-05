@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import ru.glavbot.customLogger.AVLogger;
+
 
 //import java.net.UnknownHostException;
 
@@ -20,7 +22,7 @@ import android.media.MediaRecorder.AudioSource;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
+//import android.util.Log;
 
 public class AudioSender extends Thread{
 
@@ -61,8 +63,8 @@ public class AudioSender extends Thread{
 				sync.wait();
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			Log.e("","",e);
+
+			AVLogger.e("","",e);
 			
 		}
 	}
@@ -170,14 +172,14 @@ public class AudioSender extends Thread{
 					}
 					
 						
-					Log.v("avatar audio out","starting play");
+					AVLogger.v("avatar audio out","starting play");
 					closeSocket();
 						
 					InetAddress addr = null;
 					try {
 						addr = InetAddress.getByName(host);
 					} catch (Exception e) {
-						Log.e("", "", e);
+						AVLogger.e("", "", e);
 						errorHandler.sendMessageDelayed(errorHandler.obtainMessage(AUDIO_OUT_ERROR),STD_DELAY);
 						return;
 					}
@@ -214,12 +216,12 @@ public class AudioSender extends Thread{
 						if (socket != null)
 							socket.close();
 					} catch (IOException e) {
-						Log.e("", "", e);
+						AVLogger.e("", "", e);
 					}
 					socket = null;
 					isPlaying=false;
 					OnScreenLogger.setAudioOut(false);
-					Log.v("avatar audio out","socket closed");
+					AVLogger.v("avatar audio out","socket closed");
 				}
 
 
@@ -241,7 +243,7 @@ public class AudioSender extends Thread{
 							int bytes_read=recorder.read(audioData, 0, CHUNK_SIZE_SHORTX4);
 							if(bytes_read>0)
 							{
-								Log.v("avatar audio out","read "+String.format("%d", bytes_read)+" bytes");
+								AVLogger.v("avatar audio out","read "+String.format("%d", bytes_read)+" bytes");
 								byte tmp;
 								for(int j=0;j<CHUNK_SIZE_BASEX4;j++)
 								{
@@ -268,7 +270,7 @@ public class AudioSender extends Thread{
 											//os.writeFloat((float)is.readShort()/(float)Short.MAX_VALUE);
 									}
 									catch (EOFException e) {
-										Log.v("avatar audio out","sent "+String.format("%d", (i+1)*2)+" bytes");
+										AVLogger.v("avatar audio out","sent "+String.format("%d", (i+1)*2)+" bytes");
 										break;
 									} 
 
@@ -276,7 +278,7 @@ public class AudioSender extends Thread{
 							}
 							mChildHandler.obtainMessage(PROCESS_AUDIO).sendToTarget();
 						} catch (IOException e) {
-							Log.e("","",e);
+							AVLogger.e("","",e);
 							//isPlaying=false;
 							closeSocket();
 							errorHandler.sendMessageDelayed(errorHandler.obtainMessage(AUDIO_OUT_ERROR),STD_DELAY);

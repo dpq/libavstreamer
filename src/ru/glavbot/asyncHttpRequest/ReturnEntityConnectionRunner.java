@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.apache.http.HttpResponse;
 
+import ru.glavbot.customLogger.AVLogger;
+
 import android.util.Log;
 
 public class ReturnEntityConnectionRunner extends AbstractConnectionRunner {
@@ -22,7 +24,7 @@ public class ReturnEntityConnectionRunner extends AbstractConnectionRunner {
 			
 			 rr = new AsyncRequestResponse(responce.getStatusLine().getStatusCode(),responce.getEntity() ,null);
 		} catch (Exception e) {
-				Log.e("", "", e);
+				AVLogger.e("", "", e);
 				responce.getEntity().consumeContent();
 				rr = new AsyncRequestResponse(AsyncRequestResponse.STATUS_INTERNAL_ERROR,null,e);
 		}

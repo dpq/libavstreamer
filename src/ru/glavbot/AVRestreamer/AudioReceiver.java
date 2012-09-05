@@ -9,6 +9,8 @@ import java.lang.Thread;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import ru.glavbot.customLogger.AVLogger;
+
 //import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -16,7 +18,7 @@ import android.media.AudioTrack;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
+//import android.util.Log;
 
 public class AudioReceiver extends Thread {
 
@@ -52,8 +54,8 @@ public class AudioReceiver extends Thread {
 				sync.wait();
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			Log.e("", "", e);
+
+			AVLogger.e("", "", e);
 
 		}
 	}
@@ -67,7 +69,7 @@ public class AudioReceiver extends Thread {
 
 		Message msg = mChildHandler.obtainMessage(START_AUDIO);
 		mChildHandler.sendMessage(msg);
-		Log.v("avatar audio in","internal start");
+		AVLogger.v("avatar audio in","internal start");
 	}
 
 	public void stopVoice() {
@@ -80,7 +82,7 @@ public class AudioReceiver extends Thread {
 		Message msg = mChildHandler.obtainMessage(STOP_AUDIO);
 		mChildHandler.removeMessages(START_AUDIO);
 		mChildHandler.sendMessageAtFrontOfQueue(msg);
-		Log.v("avatar audio in","internal stop");
+		AVLogger.v("avatar audio in","internal stop");
 	}
 
 	Handler mChildHandler;
@@ -142,14 +144,14 @@ public class AudioReceiver extends Thread {
 					}
 					
 					
-					Log.v("avatar audio in","starting play");
+					AVLogger.v("avatar audio in","starting play");
 					closeSocket();
 					
 					InetAddress addr = null;
 					try {
 						addr = InetAddress.getByName(host);
 					} catch (Exception e) {
-						Log.e("", "", e);
+						AVLogger.e("", "", e);
 						errorHandler.sendMessageDelayed(errorHandler.obtainMessage(AUDIO_IN_ERROR),STD_DELAY);
 						return;
 					}
@@ -200,7 +202,7 @@ public class AudioReceiver extends Thread {
 
 				private void stopPlay() {
 					
-					Log.v("avatar audio in","stopping play");
+					AVLogger.v("avatar audio in","stopping play");
 					mChildHandler.removeMessages(PROCESS_AUDIO);
 					mChildHandler.removeMessages(STOP_AUDIO);
 					
@@ -219,7 +221,7 @@ public class AudioReceiver extends Thread {
 						if (socket != null)
 							socket.close();
 					} catch (IOException e) {
-						Log.e("", "", e);
+						AVLogger.e("", "", e);
 					}
 					socket = null;
 					isPlaying = false;
@@ -241,7 +243,7 @@ public class AudioReceiver extends Thread {
 								} catch (EOFException e) {
 									break;
 								} catch (IOException e1) {
-									Log.e("", "", e1);
+									AVLogger.e("", "", e1);
 									
 									closeSocket();
 									errorHandler.sendMessageDelayed(errorHandler.obtainMessage(AUDIO_IN_ERROR),STD_DELAY);
@@ -250,7 +252,7 @@ public class AudioReceiver extends Thread {
 							}
 							
 							if (dataRead > 0) {
-								Log.v("avatar audio in" ,String.format("readed %d bytes",dataRead*2));
+								AVLogger.v("avatar audio in" ,String.format("readed %d bytes",dataRead*2));
 								player.write(shortAudioData, 0, dataRead*4);
 							}
 							
@@ -284,7 +286,7 @@ public class AudioReceiver extends Thread {
 				errorHandler.removeMessages(AUDIO_IN_ERROR);
 				if (isRecording) {
 					mChildHandler.removeMessages(START_AUDIO);
-					Log.v("avatar audio in","reconnecting on error");
+					AVLogger.v("avatar audio in","reconnecting on error");
 					internalStop();
 					internalStart();
 				}

@@ -12,6 +12,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.glavbot.customLogger.AVLogger;
+
 
 
 
@@ -35,7 +37,7 @@ import android.hardware.Camera.Size;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
+
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -137,8 +139,8 @@ public class VideoSender extends Thread {
 				sync.wait();
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			Log.e("", "", e);
+
+			AVLogger.e("", "", e);
 		}
 	}
 /*
@@ -177,7 +179,7 @@ public class VideoSender extends Thread {
 				
 				@SuppressLint("HandlerLeak")
 				private void processFrame(Message msg) {
-					Log.v("VideoSender","sending image to server");
+					AVLogger.v("VideoSender","sending image to server");
 					if (isRunning&&!socket.isConnected()) {
 						closeSocket();
 						OnScreenLogger.setVideoOut(false);
@@ -206,7 +208,7 @@ public class VideoSender extends Thread {
 						                              matrix, true);
 						os.reset();
 						rotated.compress(Bitmap.CompressFormat.JPEG, 100, os);*/
-						Log.v(this.getClass().getName(),String.format("Content-Length: %d",os.size()));
+						AVLogger.v(this.getClass().getName(),String.format("Content-Length: %d",os.size()));
 						String s = String.format("--boundarydonotcross" + eol
 								+ "Content-Type: image/jpeg" + eol
 								+ "Content-Length: %d" + eol + eol, os.size());
@@ -226,7 +228,7 @@ public class VideoSender extends Thread {
 						
 						}*/
 						catch (IOException e) {
-							//Log.e("", "", e);
+							//AVLogger.e("", "", e);
 							closeSocket();
 							//isRunning=false;
 							sendMessageDelayed(obtainMessage(INITIALIZE_VIDEO_SOCKET),STD_DELAY);
@@ -262,7 +264,7 @@ public class VideoSender extends Thread {
 						isRunning = true;
 						OnScreenLogger.setVideoOut(true);
 					} catch (Exception e) {
-						Log.e(this.getClass().getName(), this.toString(), e);
+						AVLogger.e(this.getClass().getName(), this.toString(), e);
 						closeSocket();
 						sendMessageDelayed(obtainMessage(INITIALIZE_VIDEO_SOCKET),STD_DELAY);
 					}
@@ -274,7 +276,7 @@ public class VideoSender extends Thread {
 						try {
 							socket.close();
 						} catch (IOException e) {
-							Log.e("", "", e);
+							AVLogger.e("", "", e);
 						}
 					}
 					socketOutputStream=null;
@@ -389,8 +391,8 @@ public class VideoSender extends Thread {
 		try {
 			super.finalize();
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
-			Log.e("", "", e);
+		
+			AVLogger.e("", "", e);
 
 		}
 	}
@@ -424,7 +426,7 @@ public class VideoSender extends Thread {
 		camera.setPreviewCallbackWithBuffer(new PreviewCallback() {
 
 			public void onPreviewFrame(byte[] data, Camera camera) {
-				// TODO Auto-generated method stub
+			
 
 				if (mChildHandler.hasMessages(PROCESS_FRAME)) {
 					mChildHandler.removeMessages(PROCESS_FRAME);
@@ -448,7 +450,7 @@ public class VideoSender extends Thread {
 
 	public void startCamera() {
 		// start socket;
-		Log.v("VideoSender::startCamera", "starting camera");
+		AVLogger.v("VideoSender::startCamera", "starting camera");
 		isOn=true;
 		Message msg = mChildHandler.obtainMessage(INITIALIZE_VIDEO_SOCKET);
 		mChildHandler.sendMessage(msg);
@@ -463,7 +465,7 @@ public class VideoSender extends Thread {
 			try {
 				holder.removeCallback(cameraCallback);
 			} catch (Exception e) {
-				Log.e("VideoSender::startCamera", "remove callback failed");
+				AVLogger.e("VideoSender::startCamera", "remove callback failed");
 				// do nothing
 			}
 
@@ -480,23 +482,23 @@ public class VideoSender extends Thread {
 
 		public void surfaceChanged(SurfaceHolder holder, int format, int width,
 				int height) {
-			// TODO Auto-generated method stub
+		
 
 		}
 
 		public void surfaceCreated(SurfaceHolder holder) {
-			// TODO Auto-generated method stub
+		
 			startShow(holder);
 		}
 
 		public void surfaceDestroyed(SurfaceHolder holder) {
-			// TODO Auto-generated method stub
+	
 			if (frontCamera != null) {
 				// try {
 				// frontCamera.setPreviewDisplay(null);
 				// } catch (IOException e) {
-				// // TODO Auto-generated catch block
-				// Log.e("","",e);
+			
+				// AVLogger.e("","",e);
 				//
 				// }
 			}
@@ -508,7 +510,7 @@ public class VideoSender extends Thread {
 		try {
 			frontCamera.setPreviewDisplay(holder);
 		} catch (IOException e1) {
-			Log.e("", "", e1);
+			AVLogger.e("", "", e1);
 		}
 
 		setupCamera(frontCamera);
@@ -516,7 +518,7 @@ public class VideoSender extends Thread {
 	}
 
 	public void stopCamera() {
-		Log.v("VideoSender::stopCamera", "stop camera");
+		AVLogger.v("VideoSender::stopCamera", "stop camera");
 		isOn=false;
 		Message msg = mChildHandler.obtainMessage(CLOSE_VIDEO_SOCKET);
 		mChildHandler.sendMessage(msg);
@@ -548,7 +550,7 @@ public class VideoSender extends Thread {
 				c.setErrorCallback(new ErrorCallback() {
 
 					public void onError(int error, Camera camera) {
-						// TODO Auto-generated method stub
+					
 						switch (error) {
 						case Camera.CAMERA_ERROR_SERVER_DIED:
 						case Camera.CAMERA_ERROR_UNKNOWN:

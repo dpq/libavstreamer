@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 
 import org.apache.http.HttpResponse;
 
+import ru.glavbot.customLogger.AVLogger;
+
 import android.util.Log;
 
 public class ReadAllConnectionRunner extends AbstractConnectionRunner {
@@ -29,7 +31,7 @@ public class ReadAllConnectionRunner extends AbstractConnectionRunner {
 			}
 			 rr = new AsyncRequestResponse(responce.getStatusLine().getStatusCode(),result ,null);
 		} catch (Exception e) {
-				Log.e("", "", e);
+				AVLogger.e("", "", e);
 				br.close();
 				responce.getEntity().getContent().close();
 				rr = new AsyncRequestResponse(AsyncRequestResponse.STATUS_INTERNAL_ERROR,null,e);

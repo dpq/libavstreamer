@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import ru.glavbot.customLogger.AVLogger;
+
 
 
 import android.graphics.Bitmap;
@@ -112,14 +114,14 @@ public class VideoReaderThread extends Thread {
     byte[] buffer = new byte[FRAME_MAX_LENGTH];
     
     public Bitmap readMjpegFrame(DataInputStream in) throws IOException {
-    	Log.v("VideoReceiver", "recieving image");
+    	AVLogger.v("VideoReceiver", "recieving image");
 
     	in.mark(FRAME_MAX_LENGTH);
     	int boundary;
 		try {
 			boundary = getEndOfSeqeunce(in, BOUNDARY);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			boundary =-1;
 		}
@@ -190,8 +192,8 @@ public class VideoReaderThread extends Thread {
 				sync.wait();
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			Log.e("", "", e);
+
+			AVLogger.e("", "", e);
 
 		}
 	}
@@ -205,7 +207,7 @@ public class VideoReaderThread extends Thread {
 
 		Message msg = mChildHandler.obtainMessage(START_VIDEO);
 		mChildHandler.sendMessage(msg);
-		Log.v("avatar audio in","internal start");
+		AVLogger.v("avatar audio in","internal start");
 	}
 
 	public void stopWork() {
@@ -218,7 +220,7 @@ public class VideoReaderThread extends Thread {
 		Message msg = mChildHandler.obtainMessage(STOP_VIDEO);
 		mChildHandler.removeMessages(START_VIDEO);
 		mChildHandler.sendMessageAtFrontOfQueue(msg);
-		Log.v("avatar audio in","internal stop");
+		AVLogger.v("avatar audio in","internal stop");
 	}
 
 	Handler mChildHandler;
@@ -270,14 +272,14 @@ public class VideoReaderThread extends Thread {
 					}
 					
 					
-					Log.v("avatar video in","starting play");
+					AVLogger.v("avatar video in","starting play");
 					closeSocket();
 					
 					InetAddress addr = null;
 					try {
 						addr = InetAddress.getByName(host);
 					} catch (Exception e) {
-						Log.e("", "", e);
+						AVLogger.e("", "", e);
 						errorHandler.sendMessageDelayed(errorHandler.obtainMessage(VIDEO_IN_ERROR),STD_DELAY);
 						return;
 					}
@@ -334,7 +336,7 @@ public class VideoReaderThread extends Thread {
 
 				private void stopPlay() {
 					
-					Log.v("avatar video in","stopping play");
+					AVLogger.v("avatar video in","stopping play");
 					mChildHandler.removeMessages(PROCESS_VIDEO);
 					mChildHandler.removeMessages(STOP_VIDEO);
 					
@@ -349,7 +351,7 @@ public class VideoReaderThread extends Thread {
 						if (socket != null)
 							socket.close();
 					} catch (IOException e) {
-						Log.e("", "", e);
+						AVLogger.e("", "", e);
 					}
 					socket = null;
 					videoStream= null;
@@ -406,7 +408,7 @@ public class VideoReaderThread extends Thread {
 				errorHandler.removeMessages(VIDEO_IN_ERROR);
 				if (isReading) {
 					mChildHandler.removeMessages(START_VIDEO);
-					Log.v("avatar video in","reconnecting on error");
+					AVLogger.v("avatar video in","reconnecting on error");
 					internalStop();
 					internalStart();
 				}

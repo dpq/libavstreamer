@@ -1,26 +1,28 @@
 package ru.glavbot.asyncHttpRequest;
 
-import java.io.BufferedReader;
+//import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.EOFException;
+//import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.SocketException;
+//import java.io.InputStream;
+//import java.io.InputStreamReader;
+//import java.net.SocketException;
 
 import org.apache.http.HttpResponse;
 
-import android.util.Log;
+import ru.glavbot.customLogger.AVLogger;
+
+//import android.util.Log;
 
 public class ReadStringsConnectionRunner extends AbstractConnectionRunner {
 
 	ReadStringsConnectionRunner(ConnectionManager owner) {
 		super(owner);
-		// TODO Auto-generated constructor stub
+
 	}
 
-	private static final int MAX_STRING=65536;
-	
+	//private static final int MAX_STRING=65536;
+	/*
     private int findByte(BufferedReader in, byte sequence) throws IOException {
        // int seqIndex = 0;
         byte c;
@@ -32,12 +34,12 @@ public class ReadStringsConnectionRunner extends AbstractConnectionRunner {
         }
         return -1;
     }
-	
+	*/
 	
 	@Override
 	protected AsyncRequestResponse processResponce(HttpResponse response)
 			throws IllegalStateException, IOException {
-		// TODO Auto-generated method stub
+
 		DataInputStream stream= new DataInputStream(response.getEntity().getContent());
 		//BufferedReader br = new BufferedReader(new InputStreamReader(stream));
 	//	br.mark(MAX_STRING);
@@ -81,7 +83,7 @@ public class ReadStringsConnectionRunner extends AbstractConnectionRunner {
 			}
 			rr = new AsyncRequestResponse(response.getStatusLine().getStatusCode(),null,null);
 		} catch (Exception e) {
-				Log.e("", "", e);
+				AVLogger.e("", "", e);
 				stream.close();
 				response.getEntity().consumeContent();
 				rr = new AsyncRequestResponse(AsyncRequestResponse.STATUS_INTERNAL_ERROR,null,e);

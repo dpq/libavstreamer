@@ -9,6 +9,7 @@ import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.net.http.AndroidHttpClient;
+import android.os.AsyncTask;
 
 public class ConnectionManager {
 	private ArrayList<ConnectionRequest> queue = new ArrayList<ConnectionRequest>();
@@ -46,7 +47,7 @@ public class ConnectionManager {
 			//runner = new AbstractConnectionRunner(this);
 			
 			}
-			runner.execute(next);
+			runner.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, next);
 		}
 	}
 

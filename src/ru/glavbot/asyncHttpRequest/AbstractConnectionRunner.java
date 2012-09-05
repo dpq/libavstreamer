@@ -3,7 +3,6 @@ package ru.glavbot.asyncHttpRequest;
 
 import java.io.IOException;
 
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
@@ -11,15 +10,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 
-
-
-
-
+import ru.glavbot.customLogger.AVLogger;
+//import ru.glavbot.customLogger.AVLogger;
 import android.os.AsyncTask;
-import android.util.Log;
+
 
 abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,AsyncRequestResponse,AsyncRequestResponse> {
 
@@ -98,7 +94,7 @@ abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,Asyn
 				try {
 					response.getEntity().consumeContent();
 				} catch (IOException e1) {
-					Log.e("","",e1);
+					AVLogger.e("","",e1);
 				}
 			}
 		} catch (Exception e) {
@@ -112,11 +108,11 @@ abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,Asyn
 					
 				} catch (IllegalStateException e1) {
 					// TODO Auto-generated catch block
-					Log.e("","",e1);
+					AVLogger.e("","",e1);
 					
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
-					Log.e("","",e1);
+					AVLogger.e("","",e1);
 				}
 			}
 			asyncResponce= new AsyncRequestResponse(AsyncRequestResponse.STATUS_INTERNAL_ERROR,null,e);
