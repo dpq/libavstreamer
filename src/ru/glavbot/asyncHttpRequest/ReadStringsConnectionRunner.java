@@ -2,6 +2,7 @@ package ru.glavbot.asyncHttpRequest;
 
 //import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.EOFException;
 //import java.io.EOFException;
 import java.io.IOException;
 //import java.io.InputStream;
@@ -53,8 +54,8 @@ public class ReadStringsConnectionRunner extends AbstractConnectionRunner {
 			{
 				char c;
 				
-			//	try
-			//	{
+				//try
+				//{
 					c=(char)stream.readByte();
 				
 					if(c=='\n')
@@ -68,11 +69,16 @@ public class ReadStringsConnectionRunner extends AbstractConnectionRunner {
 					{
 						line+=c;
 					}
-			//	}
-			//	catch (SocketException e)
-			//	{
-			//		throw new Exception("socket closed");
-			//	}
+				//}
+				//catch (EOFException e3)
+				//{
+				//	try{
+				//		Thread.sleep(1);
+				//	} catch (InterruptedException e4)
+				//	{
+						// do nothing!
+				//	}
+				//}
 			//	catch (IOException e1)
 			//	{
 			//	
@@ -82,7 +88,7 @@ public class ReadStringsConnectionRunner extends AbstractConnectionRunner {
 				
 			}
 			rr = new AsyncRequestResponse(response.getStatusLine().getStatusCode(),null,null);
-		} catch (Exception e) {
+		} catch (IOException e) {
 				AVLogger.e("", "", e);
 				stream.close();
 				response.getEntity().consumeContent();

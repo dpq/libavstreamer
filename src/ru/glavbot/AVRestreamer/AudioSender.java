@@ -32,14 +32,14 @@ public class AudioSender extends Thread{
 	
 	
 
-    private static final int SAMPLE_RATE = 44100;//all devices must eat that
+    private static final int SAMPLE_RATE = 11025;//all devices must eat that
 	private static final int CHUNK_SIZE_BASE = 320;
 	private static final int CHUNK_SIZE_BASEX4 = CHUNK_SIZE_BASE*4;
 	private static final int SIZEOF_SHORT = 2;
 	private static final int SIZEOF_FLOAT = 4;
 
 	private static final int CHUNK_SIZE_SHORT = CHUNK_SIZE_BASE * SIZEOF_SHORT;
-	private static final int CHUNK_SIZE_SHORTX4 = CHUNK_SIZE_SHORT*4;
+//	private static final int CHUNK_SIZE_SHORTX4 = CHUNK_SIZE_SHORT*4;
 	
 	private static final int CHUNK_SIZE_FLOAT = CHUNK_SIZE_BASE * SIZEOF_FLOAT;
 
@@ -112,7 +112,7 @@ public class AudioSender extends Thread{
 		 synchronized(sync){
 			 setName("AudioSender");
 	        Looper.prepare();
-	        
+	        Thread.currentThread().setPriority(7);
 	        mChildHandler = new Handler() {
 
 	        //	boolean isRunning = false;
@@ -120,7 +120,7 @@ public class AudioSender extends Thread{
 	        	Socket socket = null;
 	            private boolean isPlaying = false;        	
 
-	            private byte[] audioData= new byte[CHUNK_SIZE_SHORTX4];
+	            private byte[] audioData= new byte[CHUNK_SIZE_SHORT];
 	            AudioRecord recorder = null;
 	            private DataOutputStream os=null;
 	            private DataInputStream is=new DataInputStream(new ByteArrayInputStream(audioData));
@@ -129,7 +129,7 @@ public class AudioSender extends Thread{
 					bufferSize =AudioRecord.getMinBufferSize(SAMPLE_RATE,
 	                        AudioFormat.CHANNEL_IN_MONO,
 	                        AudioFormat.ENCODING_PCM_16BIT);
-					bufferSize=bufferSize<CHUNK_SIZE_SHORTX4?CHUNK_SIZE_SHORTX4:bufferSize;
+					bufferSize=bufferSize<CHUNK_SIZE_SHORT?CHUNK_SIZE_SHORT:bufferSize;
 			        is.mark(CHUNK_SIZE_FLOAT*4);
 				    recorder = new AudioRecord(AudioSource.VOICE_COMMUNICATION, SAMPLE_RATE,
 			                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
@@ -188,7 +188,7 @@ public class AudioSender extends Thread{
 						
 						socket.setKeepAlive(true);
 						socket.setSoTimeout(1000);
-						socket.setSendBufferSize(CHUNK_SIZE_SHORTX4+10);
+						//socket.setSendBufferSize(CHUNK_SIZE_SHORTX4+10);
 						socket.setSoLinger(true, 0);
 						OutputStream s = socket.getOutputStream();
 						String ident = getToken();
@@ -240,12 +240,12 @@ public class AudioSender extends Thread{
 					if(isPlaying)
 					{
 						try {
-							int bytes_read=recorder.read(audioData, 0, CHUNK_SIZE_SHORTX4);
+							int bytes_read=recorder.read(audioData, 0, CHUNK_SIZE_SHORT);
 							if(bytes_read>0)
 							{
 								AVLogger.v("avatar audio out","read "+String.format("%d", bytes_read)+" bytes");
 								byte tmp;
-								for(int j=0;j<CHUNK_SIZE_BASEX4;j++)
+								for(int j=0;j<CHUNK_SIZE_BASE;j++)
 								{
 									tmp=audioData[j*2];
 									audioData[j*2]=audioData[j*2+1];
@@ -255,18 +255,18 @@ public class AudioSender extends Thread{
 								int i;
 								is.reset();
 								int ctr=0;
-								for(i=0;i<CHUNK_SIZE_BASEX4;i++)
+								for(i=0;i<CHUNK_SIZE_BASE;i++)
 								{
 									
 									//if(tmpShort==0)tmpShort=1;
 									try{
 										short tmpShort = is.readShort();
-										if(ctr==0)
+										//if(ctr==0)
 										{
 											os.writeShort(tmpShort);
 										}
-										ctr++;
-										ctr=ctr%4;
+										//ctr++;
+										//ctr=ctr%4;
 											//os.writeFloat((float)is.readShort()/(float)Short.MAX_VALUE);
 									}
 									catch (EOFException e) {
@@ -290,6 +290,10 @@ public class AudioSender extends Thread{
 				}
 
 	        };
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+			}
 	        sync.notifyAll();
 		 }
 	        

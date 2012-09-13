@@ -119,8 +119,15 @@ public class VideoReaderThread extends Thread {
     	in.mark(FRAME_MAX_LENGTH);
     	int boundary;
 		try {
+			
+			
 			boundary = getEndOfSeqeunce(in, BOUNDARY);
-		} catch (IOException e) {
+		} 
+		catch (EOFException e) {
+			
+			throw e;
+		}
+		catch (IOException e) {
 			
 			e.printStackTrace();
 			boundary =-1;
@@ -366,13 +373,16 @@ public class VideoReaderThread extends Thread {
 							
 							
 						try {
+							AVLogger.d("avatar video in","reading frame" );
 							Bitmap b = readMjpegFrame(videoStream);
 							if(b!=null)
 							{
+								AVLogger.d("avatar video in","reading frame succeed" );
 								drawerHandler.removeMessages(VideoDrawerThread.RUN);
 								drawerHandler.obtainMessage(VideoDrawerThread.RUN, b).sendToTarget();
 							}
 						} catch (IOException e) {
+							AVLogger.w("avatar video in","reading frame failed" );
 							closeSocket();
 							errorHandler.sendMessageDelayed(errorHandler.obtainMessage(VIDEO_IN_ERROR),STD_DELAY);
 						}
@@ -386,6 +396,10 @@ public class VideoReaderThread extends Thread {
 				}
 
 			};
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+			}
 			sync.notifyAll();
 		}
 		Looper.loop();

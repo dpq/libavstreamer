@@ -303,11 +303,14 @@ public class VideoSender extends Thread {
 					default:
 						throw new RuntimeException(
 								"Unknown command to video writer thread");
-					}
-					;
+					};
 
 				}
 			};
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+			}
 			sync.notifyAll();
 		}
 

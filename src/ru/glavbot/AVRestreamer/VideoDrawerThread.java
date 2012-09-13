@@ -214,7 +214,10 @@ public class VideoDrawerThread extends Thread {
 	   				doRun(Bitmap.createBitmap(img, 1, 1, Bitmap.Config.RGB_565));
 	   			}
 	   		};
-	   		        
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+			}       
 	   		sync.notifyAll();
 		}
 		Looper.loop();

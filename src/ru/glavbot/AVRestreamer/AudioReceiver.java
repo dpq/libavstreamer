@@ -27,7 +27,7 @@ public class AudioReceiver extends Thread {
 	private String token;
 	private static final String eol = "\r\n";
 	AudioTrack player = null;
-	private static final int SAMPLE_RATE = 44100;
+	private static final int SAMPLE_RATE = 11025;
 	private static final int CHUNK_SIZE_BASE = 320;
 	private static final int CHUNK_SIZE_BASEX4 = CHUNK_SIZE_BASE*4;
 //	private static final int SIZEOF_SHORT = 2;
@@ -35,7 +35,7 @@ public class AudioReceiver extends Thread {
 
 //	private static final int CHUNK_SIZE_SHORT = CHUNK_SIZE_BASE * SIZEOF_SHORT;
 	private static final int BUFF_SIZE = CHUNK_SIZE_BASE * SIZEOF_FLOAT*2;
-	private static final int STD_DELAY = 1000;
+	private static final int STD_DELAY = 5000;
 
 
 	Object sync = new Object();
@@ -99,18 +99,19 @@ public class AudioReceiver extends Thread {
 		synchronized (sync) {
 			Looper.prepare();
 			setName("AudioReceiver");
+			Thread.currentThread().setPriority(7);
 			mChildHandler = new Handler() {
 
 				Socket socket = null;
 
-				private short[] shortAudioData = new short[CHUNK_SIZE_BASEX4];
+				private short[] shortAudioData = new short[CHUNK_SIZE_BASE];
 				
 				private int bufferSize;
 				{
 					bufferSize = AudioTrack.getMinBufferSize(SAMPLE_RATE,
 							AudioFormat.CHANNEL_CONFIGURATION_MONO,
 							AudioFormat.ENCODING_PCM_16BIT);
-					bufferSize = CHUNK_SIZE_BASEX4 > bufferSize ? CHUNK_SIZE_BASEX4: bufferSize;
+					bufferSize = CHUNK_SIZE_BASE > bufferSize ? CHUNK_SIZE_BASE: bufferSize;
 				}
 				
 				DataInputStream floatStream;
@@ -134,58 +135,60 @@ public class AudioReceiver extends Thread {
 				}
 
 				private void startPlay() {
-					
+
 					if (hasMessages(START_AUDIO)) {
 						removeMessages(START_AUDIO);
 					}
-					if(isPlaying)
-					{
+					if (isPlaying) {
 						return;
 					}
-					
-					
-					AVLogger.v("avatar audio in","starting play");
+
+					AVLogger.v("avatar audio in", "starting play");
 					closeSocket();
-					
+
 					InetAddress addr = null;
 					try {
 						addr = InetAddress.getByName(host);
 					} catch (Exception e) {
 						AVLogger.e("", "", e);
-						errorHandler.sendMessageDelayed(errorHandler.obtainMessage(AUDIO_IN_ERROR),STD_DELAY);
+						errorHandler.sendMessageDelayed(
+								errorHandler.obtainMessage(AUDIO_IN_ERROR),
+								STD_DELAY);
 						return;
 					}
 
 					try {
 						socket = new Socket(addr, port);
 						socket.setKeepAlive(true);
-						socket.setSoTimeout(10000);
-						socket.setReceiveBufferSize(BUFF_SIZE);
+						socket.setSoTimeout(4000);
+						//socket.setReceiveBufferSize(BUFF_SIZE);
+						socket.setSoLinger(true, 0);
 						OutputStream s = socket.getOutputStream();
-						String ident =  getToken();
-						
-						String header = 	  String.format(
-											  "GET /%s HTTP/1.1"
-											  +eol +"Server: %s:%d"+eol
-											  +"User-Agent: avatar/0.2"+eol  +eol ,
-											 ident  ,host,port
-													  );
+						String ident = getToken();
+
+						String header = String.format("GET /%s HTTP/1.1" + eol
+								+ "Server: %s:%d" + eol
+								+ "User-Agent: avatar/0.2" + eol + eol, ident,
+								host, port);
 						s.write(header.getBytes());
-						floatStream = new DataInputStream(socket.getInputStream());
-						String dataToGet=(eol  +eol);
-						String data="";
-						while (!(data.contains(dataToGet)||(data.length()>=1000)||interrupted()||hasMessages(STOP_AUDIO)))
-						{
-							data+=(char)floatStream.readByte();
+						floatStream = new DataInputStream(
+								socket.getInputStream());
+						String dataToGet = (eol + eol);
+						String data = "";
+						while (!(data.contains(dataToGet)
+								|| (data.length() >= 1000) || interrupted() || hasMessages(STOP_AUDIO))) {
+							data += (char) floatStream.readByte();
 						}
-						if(!data.contains(dataToGet))
-						{
-							throw new IOException("Incorrect answer to http request!!!");
+						if (!data.contains(dataToGet)) {
+							throw new IOException(
+									"Incorrect answer to http request!!!");
 						}
-						
+
 					} catch (IOException e) {
 						closeSocket();
-						errorHandler.sendMessageDelayed(errorHandler.obtainMessage(AUDIO_IN_ERROR),STD_DELAY);
+						errorHandler.sendMessageDelayed(
+								errorHandler.obtainMessage(AUDIO_IN_ERROR),
+								STD_DELAY);
 						return;
 					}
 
@@ -197,7 +200,7 @@ public class AudioReceiver extends Thread {
 							AudioTrack.MODE_STREAM);
 					player.play();
 					mChildHandler.obtainMessage(PROCESS_AUDIO).sendToTarget();
-					
+
 				}
 
 				private void stopPlay() {
@@ -219,7 +222,10 @@ public class AudioReceiver extends Thread {
 				{
 					try {
 						if (socket != null)
+						{
 							socket.close();
+							
+						}
 					} catch (IOException e) {
 						AVLogger.e("", "", e);
 					}
@@ -236,10 +242,10 @@ public class AudioReceiver extends Thread {
 							for (dataRead = 0; dataRead < CHUNK_SIZE_BASE; dataRead++) {
 								try {
 									short curr = (short) floatStream.readShort();//(floatStream.readFloat() * (float) Short.MAX_VALUE);
-									for(int i=0;i<4;i++)
-									{
-									shortAudioData[dataRead*4+i] = curr;
-									}
+									//for(int i=0;i<4;i++)
+									//{
+									shortAudioData[dataRead/**4+i*/] = curr;
+									//}
 								} catch (EOFException e) {
 									break;
 								} catch (IOException e1) {
@@ -253,7 +259,7 @@ public class AudioReceiver extends Thread {
 							
 							if (dataRead > 0) {
 								AVLogger.v("avatar audio in" ,String.format("readed %d bytes",dataRead*2));
-								player.write(shortAudioData, 0, dataRead*4);
+								player.write(shortAudioData, 0, dataRead);
 							}
 							
 							if(isPlaying)
@@ -264,6 +270,10 @@ public class AudioReceiver extends Thread {
 				}
 
 			};
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+			}
 			sync.notifyAll();
 		}
 		Looper.loop();
