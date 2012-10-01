@@ -300,7 +300,7 @@ public class VideoReaderThread extends Thread {
 						String ident =  getToken();
 						
 						String header = 	  String.format(
-											  "GET /restreamer?oid=%s HTTP/1.1"
+											  "GET /restreamer?oid=%s&imagetag=anonym HTTP/1.1"
 											  +eol +"Server: %s:%d"+eol
 											  +"User-Agent: avatar/0.2"+eol  +eol ,
 											 ident  ,host,port);

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.MalformedChunkCodingException;
 
 import ru.glavbot.customLogger.AVLogger;
 
@@ -30,10 +31,16 @@ public class ReadAllConnectionRunner extends AbstractConnectionRunner {
 					result += line;
 			}
 			 rr = new AsyncRequestResponse(responce.getStatusLine().getStatusCode(),result ,null);
-		} catch (Exception e) {
+		} catch (MalformedChunkCodingException e)
+		{
+			AVLogger.v("", "", e);
+			consumeCurrentResponce();
+			rr = new AsyncRequestResponse(responce.getStatusLine().getStatusCode(),result ,null);
+		}
+		catch(Exception e) {
 				AVLogger.e("", "", e);
-				br.close();
-				responce.getEntity().getContent().close();
+				consumeCurrentResponce();
+				//responce.getEntity().getContent().close();
 				rr = new AsyncRequestResponse(AsyncRequestResponse.STATUS_INTERNAL_ERROR,null,e);
 		}
 		return rr;

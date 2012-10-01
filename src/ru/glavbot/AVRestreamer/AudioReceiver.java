@@ -1,6 +1,7 @@
 package ru.glavbot.AVRestreamer;
 
 //import java.io.ByteArrayInputStream;
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class AudioReceiver extends Thread {
 	private static final int STD_DELAY = 5000;
 
 
+	
 	Object sync = new Object();
 
 	public void setHostAndPort(String host, int port)
@@ -156,7 +158,8 @@ public class AudioReceiver extends Thread {
 								STD_DELAY);
 						return;
 					}
-
+					String dataToGet = (eol + eol);
+					String data = "";
 					try {
 						socket = new Socket(addr, port);
 						socket.setKeepAlive(true);
@@ -170,11 +173,20 @@ public class AudioReceiver extends Thread {
 								+ "Server: %s:%d" + eol
 								+ "User-Agent: avatar/0.2" + eol + eol, ident,
 								host, port);
-						s.write(header.getBytes());
-						floatStream = new DataInputStream(
-								socket.getInputStream());
-						String dataToGet = (eol + eol);
-						String data = "";
+						
+						try
+						{
+							s.write(header.getBytes());
+							s.flush();
+						}catch (IOException e) {
+							AVLogger.e("avatar audio in","Error sending http get request! "+data);
+							throw e;
+						}
+						
+						
+						floatStream = new DataInputStream( new BufferedInputStream(
+								socket.getInputStream()));
+
 						while (!(data.contains(dataToGet)
 								|| (data.length() >= 1000) || interrupted() || hasMessages(STOP_AUDIO))) {
 							data += (char) floatStream.readByte();
@@ -185,10 +197,13 @@ public class AudioReceiver extends Thread {
 						}
 
 					} catch (IOException e) {
+						if (!data.contains(dataToGet)) {
+							AVLogger.e("avatar audio in","\\r\\n not found in string "+data);
 						closeSocket();
 						errorHandler.sendMessageDelayed(
 								errorHandler.obtainMessage(AUDIO_IN_ERROR),
 								STD_DELAY);
+						}
 						return;
 					}
 
@@ -246,8 +261,6 @@ public class AudioReceiver extends Thread {
 									//{
 									shortAudioData[dataRead/**4+i*/] = curr;
 									//}
-								} catch (EOFException e) {
-									break;
 								} catch (IOException e1) {
 									AVLogger.e("", "", e1);
 									

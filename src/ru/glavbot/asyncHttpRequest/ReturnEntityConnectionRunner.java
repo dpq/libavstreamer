@@ -25,7 +25,7 @@ public class ReturnEntityConnectionRunner extends AbstractConnectionRunner {
 			 rr = new AsyncRequestResponse(responce.getStatusLine().getStatusCode(),responce.getEntity() ,null);
 		} catch (Exception e) {
 				AVLogger.e("", "", e);
-				responce.getEntity().consumeContent();
+				consumeCurrentResponce();
 				rr = new AsyncRequestResponse(AsyncRequestResponse.STATUS_INTERNAL_ERROR,null,e);
 		}
 		return rr;

@@ -2,6 +2,7 @@ package ru.glavbot.AVRestreamer;
  
 import java.io.ByteArrayInputStream;
 //import java.io.ByteArrayOutputStream;
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -37,7 +38,8 @@ public class AudioSender extends Thread{
 	private static final int CHUNK_SIZE_BASEX4 = CHUNK_SIZE_BASE*4;
 	private static final int SIZEOF_SHORT = 2;
 	private static final int SIZEOF_FLOAT = 4;
-
+	private static final String eol = "\r\n";
+	
 	private static final int CHUNK_SIZE_SHORT = CHUNK_SIZE_BASE * SIZEOF_SHORT;
 //	private static final int CHUNK_SIZE_SHORTX4 = CHUNK_SIZE_SHORT*4;
 	
@@ -183,17 +185,28 @@ public class AudioSender extends Thread{
 						errorHandler.sendMessageDelayed(errorHandler.obtainMessage(AUDIO_OUT_ERROR),STD_DELAY);
 						return;
 					}
+					String dataToGet = (eol + eol);
+					String data = "";
 					try {
 						socket = new Socket(addr, port);
 						
 						socket.setKeepAlive(true);
-						socket.setSoTimeout(1000);
+						socket.setSoTimeout(3000);
 						//socket.setSendBufferSize(CHUNK_SIZE_SHORTX4+10);
 						socket.setSoLinger(true, 0);
 						OutputStream s = socket.getOutputStream();
 						String ident = getToken();
-						s.write(ident.getBytes());
+
+						
+						
+						
+						String header = String.format("POST /%s HTTP/1.1" + eol
+								+ "Server: %s:%d" + eol
+								+ "User-Agent: avatar/0.2" + eol + eol, ident,
+								host, port);
+						s.write(header.getBytes());
 						s.flush();
+						
 
 						os = new DataOutputStream(s);
 

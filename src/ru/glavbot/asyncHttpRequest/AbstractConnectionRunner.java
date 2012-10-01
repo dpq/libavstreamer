@@ -27,16 +27,19 @@ abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,Asyn
 	
 	protected boolean needConsume=true;
 	
-	protected void consumeCurrentResponce()
+	protected synchronized void consumeCurrentResponce()
 	{
+		needConsume=false;
 		if(response!=null)
 		{
 			try {
 				response.getEntity().consumeContent();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				//e.printStackTrace();
+			} 
+
+
 		}
 	}
 	
@@ -92,8 +95,9 @@ abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,Asyn
 			{
 				asyncResponce = new AsyncRequestResponse(rcode,null,null);
 				try {
-					response.getEntity().consumeContent();
-				} catch (IOException e1) {
+					consumeCurrentResponce();
+				} 
+				catch (IllegalStateException e1) {
 					AVLogger.e("","",e1);
 				}
 			}
@@ -104,16 +108,13 @@ abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,Asyn
 			{
 				try {
 					//response.getEntity().getContent().close();
-					response.getEntity().consumeContent();
+					consumeCurrentResponce();
 					
 				} catch (IllegalStateException e1) {
 					// TODO Auto-generated catch block
 					AVLogger.e("","",e1);
 					
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					AVLogger.e("","",e1);
-				}
+				} 
 			}
 			asyncResponce= new AsyncRequestResponse(AsyncRequestResponse.STATUS_INTERNAL_ERROR,null,e);
 		}

@@ -178,7 +178,17 @@ public class VideoDrawerThread extends Thread {
 	   		                    c.drawColor(Color.BLACK);
 	   		                    if(frame!=null)
 	   		                    {
-	   		                        Rect destRect = new Rect(0, 0, surfaceWidth, surfaceHeight);
+	   		                    	
+	   		                    	float arHorisontal=(float)surfaceWidth/(float)frame.getWidth();
+	   		                    	float arVertical=(float)surfaceHeight/(float)frame.getHeight();
+	   		                    	float ar = arVertical<arHorisontal?arVertical:arHorisontal;
+	   		                    	
+	   		                    	int vOffset=(int) (((float)surfaceHeight-(float)(frame.getHeight())*ar)/2);
+	   		                    	int hOffset=(int) (((float)surfaceWidth-(float)(frame.getWidth())*ar)/2);
+	   		                    	
+	   		                    	
+	   		                    	
+	   		                        Rect destRect = new Rect(hOffset, vOffset, (int)(frame.getWidth()*ar)+hOffset, (int)(frame.getHeight()*ar)+vOffset);
 		   		                    c.drawBitmap(frame, null, destRect, p);
 		   		                    frame.recycle();
 		   		                           

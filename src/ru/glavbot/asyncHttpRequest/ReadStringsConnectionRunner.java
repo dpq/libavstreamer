@@ -90,8 +90,7 @@ public class ReadStringsConnectionRunner extends AbstractConnectionRunner {
 			rr = new AsyncRequestResponse(response.getStatusLine().getStatusCode(),null,null);
 		} catch (IOException e) {
 				AVLogger.e("", "", e);
-				stream.close();
-				response.getEntity().consumeContent();
+				consumeCurrentResponce();
 				rr = new AsyncRequestResponse(AsyncRequestResponse.STATUS_INTERNAL_ERROR,null,e);
 		}
 		return rr;
