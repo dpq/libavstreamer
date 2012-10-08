@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -154,7 +155,7 @@ public class VideoReaderThread extends Thread {
         return BitmapFactory.decodeStream(new ByteArrayInputStream(buffer));
     }
     
-    void myReadFully(DataInputStream in,byte[] dst, int offset, int byteCount) throws IOException
+    void myReadFully(InputStream in,byte[] dst, int offset, int byteCount) throws IOException
     {
     	int toRead=byteCount;
     	int curOffset=offset;
