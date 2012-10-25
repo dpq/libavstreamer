@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import ru.glavbot.customLogger.AVLogger;
 //import ru.glavbot.customLogger.AVLogger;
@@ -64,7 +65,10 @@ abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,Asyn
 	protected AsyncRequestResponse doInBackground(ConnectionRequest... params) {
 		request = params[0];
 		HttpClient client = owner.getClient();
+		HttpParams p =client.getParams();
 		HttpConnectionParams.setSoTimeout(client.getParams(), request.getTimeout());
+		HttpConnectionParams.setConnectionTimeout(client.getParams(), request.getTimeout());
+		
 		AsyncRequestResponse asyncResponce=null;
 		try {
 			

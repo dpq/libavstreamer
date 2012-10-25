@@ -10,8 +10,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import ru.glavbot.customLogger.AVLogger;
+import ru.glavbot.gsmfr.Encoder;
+import ru.glavbot.gsmfr.Gsm;
 
 
 //import java.net.UnknownHostException;
@@ -30,23 +34,26 @@ public class AudioSender extends Thread{
 	private String host;
 	private int port;
 	private String token;
-	
+	private boolean useGsm;
 	
 
-    private static final int SAMPLE_RATE = 11025;//all devices must eat that
-	private static final int CHUNK_SIZE_BASE = 320;
-	private static final int CHUNK_SIZE_BASEX4 = CHUNK_SIZE_BASE*4;
+    private static final int SAMPLE_RATE = 44100;//all devices must eat that
+	private static final int CHUNK_SIZE_BASE = 882;
+	//private static final int CHUNK_SIZE_BASEX4 = CHUNK_SIZE_BASE*4;
 	private static final int SIZEOF_SHORT = 2;
 	private static final int SIZEOF_FLOAT = 4;
 	private static final String eol = "\r\n";
 	
 	private static final int CHUNK_SIZE_SHORT = CHUNK_SIZE_BASE * SIZEOF_SHORT;
-//	private static final int CHUNK_SIZE_SHORTX4 = CHUNK_SIZE_SHORT*4;
+	
+	private static final int CHUNK_SIZE_FINAL = 160;
 	
 	private static final int CHUNK_SIZE_FLOAT = CHUNK_SIZE_BASE * SIZEOF_FLOAT;
 
 	private static final int STD_DELAY = 1000;  
-      
+     
+	
+	
     Object sync= new Object();
     
     public void setHostAndPort(String host, int port)
@@ -107,7 +114,7 @@ public class AudioSender extends Thread{
 	private static final int STOP_AUDIO=2;
 	protected static final int AUDIO_OUT_ERROR = -2;
 
-
+	
 	
 	 public void run() {
 
@@ -118,11 +125,16 @@ public class AudioSender extends Thread{
 	        mChildHandler = new Handler() {
 
 	        //	boolean isRunning = false;
+	        	Encoder encoder = new Encoder();
+	        	byte[] gsm = new byte[Gsm.GSM_SAMPLE_SIZE];
+	        	
 	        	
 	        	Socket socket = null;
 	            private boolean isPlaying = false;        	
 
 	            private byte[] audioData= new byte[CHUNK_SIZE_SHORT];
+	            private short[] listenAudioData = new short[CHUNK_SIZE_BASE];
+	            private short[] preparedAudioData= new short[CHUNK_SIZE_FINAL];
 	            AudioRecord recorder = null;
 	            private DataOutputStream os=null;
 	            private DataInputStream is=new DataInputStream(new ByteArrayInputStream(audioData));
@@ -194,6 +206,7 @@ public class AudioSender extends Thread{
 						socket.setSoTimeout(3000);
 						//socket.setSendBufferSize(CHUNK_SIZE_SHORTX4+10);
 						socket.setSoLinger(true, 0);
+						//socket.setTcpNoDelay(true);
 						OutputStream s = socket.getOutputStream();
 						String ident = getToken();
 
@@ -257,36 +270,53 @@ public class AudioSender extends Thread{
 							if(bytes_read>0)
 							{
 								AVLogger.v("avatar audio out","read "+String.format("%d", bytes_read)+" bytes");
-								byte tmp;
+								
+								// a) fix endianess
+								/*byte tmp;
 								for(int j=0;j<CHUNK_SIZE_BASE;j++)
 								{
 									tmp=audioData[j*2];
 									audioData[j*2]=audioData[j*2+1];
 									audioData[j*2+1]=tmp;
-								}
-								//os.write(audioData, 0, bytes_read);
-								int i;
-								is.reset();
-								int ctr=0;
-								for(i=0;i<CHUNK_SIZE_BASE;i++)
-								{
+								}*/
+								
+								
+								ByteBuffer.wrap(audioData).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(listenAudioData);
+								//b) create array of shorts
+								//is.reset();
+								//for(int i=0;i<CHUNK_SIZE_BASE;i++)
+								//{
 									
-									//if(tmpShort==0)tmpShort=1;
-									try{
-										short tmpShort = is.readShort();
-										//if(ctr==0)
-										{
-											os.writeShort(tmpShort);
-										}
-										//ctr++;
-										//ctr=ctr%4;
-											//os.writeFloat((float)is.readShort()/(float)Short.MAX_VALUE);
-									}
-									catch (EOFException e) {
-										AVLogger.v("avatar audio out","sent "+String.format("%d", (i+1)*2)+" bytes");
-										break;
-									} 
+								//	try{
+								//		listenAudioData[i] = is.readShort();
+								//	}
+								//	catch (EOFException e) {
+								//		AVLogger.v("avatar audio out","sent "+String.format("%d", (i+1)*2)+" bytes");
+								//		break;
+								//	} 
 
+								//}
+								// c) downsampling
+								for (int i=0; i<CHUNK_SIZE_FINAL;i++)
+								{
+									preparedAudioData[i]=listenAudioData[i*441/80];
+								}
+								
+								
+								
+								if(useGsm)
+								{
+									encoder.encode(preparedAudioData, gsm);
+									os.write(gsm);
+									os.flush();
+								}
+								else
+								{
+									for (int i=0; i<CHUNK_SIZE_FINAL;i++)
+									{
+										os.writeShort(preparedAudioData[i]);
+									}
+									
 								}
 							}
 							mChildHandler.obtainMessage(PROCESS_AUDIO).sendToTarget();
@@ -320,6 +350,15 @@ public class AudioSender extends Thread{
 	public void setToken(String token) {
 		this.token = token;
 	};
+	public boolean isUseGsm() {
+		return useGsm;
+	}
+
+
+	public void setUseGsm(boolean useGsm) {
+		this.useGsm = useGsm;
+	}
+
 	private Handler errorHandler = new Handler()
     {
     	@Override
