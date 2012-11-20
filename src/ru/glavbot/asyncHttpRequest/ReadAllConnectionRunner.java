@@ -9,7 +9,7 @@ import org.apache.http.MalformedChunkCodingException;
 
 import ru.glavbot.customLogger.AVLogger;
 
-import android.util.Log;
+//import android.util.Log;
 
 public class ReadAllConnectionRunner extends AbstractConnectionRunner {
 

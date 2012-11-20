@@ -7,7 +7,7 @@ import android.view.SurfaceView;
 //import de.mjpegsample.MjpegView.MjpegView;
 
 public class VideoReceiver {
-	private SurfaceView view;
+	//private SurfaceView view;
 	private String token;
 	//private String address;
 	//private String host;
@@ -28,7 +28,7 @@ public class VideoReceiver {
 	
 	public VideoReceiver(SurfaceView view)
 	{
-		this.view=view;
+		//this.view=view;
 		drawer= new VideoDrawerThread(view);
 		reader= new VideoReaderThread();
 		reader.setDrawerHandler(drawer.getChildHandler());

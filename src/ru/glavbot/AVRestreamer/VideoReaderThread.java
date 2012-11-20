@@ -20,7 +20,7 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
+//import android.util.Log;
 
 public class VideoReaderThread extends Thread {
 	private String host;
@@ -359,7 +359,7 @@ public class VideoReaderThread extends Thread {
 						if (socket != null)
 							socket.close();
 					} catch (IOException e) {
-						AVLogger.e("", "", e);
+						AVLogger.w("avatar video in", "error closing socket", e);
 					}
 					socket = null;
 					videoStream= null;

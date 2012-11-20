@@ -3,7 +3,7 @@ package ru.glavbot.AVRestreamer;
 //import java.io.ByteArrayInputStream;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.EOFException;
+//import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.Thread;
@@ -35,12 +35,12 @@ public class AudioReceiver extends Thread {
 	AudioTrack player = null;
 	private static final int SAMPLE_RATE = 8000;
 	private static final int CHUNK_SIZE_BASE = 160;
-	private static final int CHUNK_SIZE_BASEX4 = CHUNK_SIZE_BASE * 4;
+	//private static final int CHUNK_SIZE_BASEX4 = CHUNK_SIZE_BASE * 4;
 	private static final int SIZEOF_SHORT = 2;
-	private static final int SIZEOF_FLOAT = 4;
+	//private static final int SIZEOF_FLOAT = 4;
 
 	private static final int CHUNK_SIZE_SHORT = CHUNK_SIZE_BASE * SIZEOF_SHORT;
-	private static final int BUFF_SIZE = CHUNK_SIZE_BASE * SIZEOF_FLOAT * 2;
+	//private static final int BUFF_SIZE = CHUNK_SIZE_BASE * SIZEOF_FLOAT * 2;
 	private static final int STD_DELAY = 5000;
 
 	private boolean useGsm;
@@ -250,7 +250,7 @@ public class AudioReceiver extends Thread {
 
 						}
 					} catch (IOException e) {
-						AVLogger.e("", "", e);
+						AVLogger.w("avatar audio in", "error closing socket", e);
 					}
 					socket = null;
 					isPlaying = false;
@@ -290,7 +290,7 @@ public class AudioReceiver extends Thread {
 									/*] = curr;*/
 									// }
 								} catch (IOException e1) {
-									AVLogger.e("", "", e1);
+									AVLogger.w("", "error receiving audio", e1);
 
 									closeSocket();
 									errorHandler.sendMessageDelayed(errorHandler.obtainMessage(AUDIO_IN_ERROR),	STD_DELAY);

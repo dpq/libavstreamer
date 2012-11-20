@@ -2,7 +2,7 @@ package ru.glavbot.asyncHttpRequest;
 
 //import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.EOFException;
+//import java.io.EOFException;
 //import java.io.EOFException;
 import java.io.IOException;
 //import java.io.InputStream;

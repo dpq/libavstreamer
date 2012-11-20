@@ -2,10 +2,11 @@ package ru.glavbot.AVRestreamer;
  
 import java.io.ByteArrayInputStream;
 //import java.io.ByteArrayOutputStream;
-import java.io.BufferedInputStream;
+//import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
+//import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -52,7 +53,9 @@ public class AudioSender extends Thread{
 
 	private static final int STD_DELAY = 1000;  
      
+	private volatile int packageMillis = 100;
 	
+	private static final int PACKAGE_TIME= 20;
 	
     Object sync= new Object();
     
@@ -197,8 +200,8 @@ public class AudioSender extends Thread{
 						errorHandler.sendMessageDelayed(errorHandler.obtainMessage(AUDIO_OUT_ERROR),STD_DELAY);
 						return;
 					}
-					String dataToGet = (eol + eol);
-					String data = "";
+					//String dataToGet = (eol + eol);
+					//String data = "";
 					try {
 						socket = new Socket(addr, port);
 						
@@ -206,7 +209,7 @@ public class AudioSender extends Thread{
 						socket.setSoTimeout(3000);
 						//socket.setSendBufferSize(CHUNK_SIZE_SHORTX4+10);
 						socket.setSoLinger(true, 0);
-						//socket.setTcpNoDelay(true);
+						socket.setTcpNoDelay(true);
 						OutputStream s = socket.getOutputStream();
 						String ident = getToken();
 
@@ -232,6 +235,8 @@ public class AudioSender extends Thread{
 							
 					isPlaying=true;
 					OnScreenLogger.setAudioOut(true);
+					
+					//queue.mark(MAX_QUEUE);
 					recorder.startRecording();
 					mChildHandler.obtainMessage(PROCESS_AUDIO).sendToTarget();
 				}
@@ -242,10 +247,12 @@ public class AudioSender extends Thread{
 						if (socket != null)
 							socket.close();
 					} catch (IOException e) {
-						AVLogger.e("", "", e);
+						AVLogger.w("avatar audio out", "error closing socket", e);
 					}
+					
 					socket = null;
 					isPlaying=false;
+					resetQueue();
 					OnScreenLogger.setAudioOut(false);
 					AVLogger.v("avatar audio out","socket closed");
 				}
@@ -259,9 +266,19 @@ public class AudioSender extends Thread{
 					
 				}
 
-
-
-
+				private static final int MAX_QUEUE= Gsm.GSM_SAMPLE_SIZE*100;
+				private int packagesInQueue=0;
+				
+				//private byte[] queueData= new byte[MAX_QUEUE];
+				private ByteArrayOutputStream queue = new ByteArrayOutputStream(MAX_QUEUE);
+				
+				private void resetQueue()
+				{
+					packagesInQueue=0;
+					queue.reset();
+				}
+				
+				
 				private void doRecord() {
 					if(isPlaying)
 					{
@@ -307,13 +324,20 @@ public class AudioSender extends Thread{
 								if(useGsm)
 								{
 									encoder.encode(preparedAudioData, gsm);
-									os.write(gsm);
-									os.flush();
+									queue.write(gsm);
+									packagesInQueue++;
+									if(((packagesInQueue* PACKAGE_TIME)>packageMillis)||(packagesInQueue==100))
+									{
+										os.write(queue.toByteArray(),0,packagesInQueue*Gsm.GSM_SAMPLE_SIZE);
+										os.flush();
+										resetQueue();
+									}
 								}
 								else
 								{
 									for (int i=0; i<CHUNK_SIZE_FINAL;i++)
 									{
+										
 										os.writeShort(preparedAudioData[i]);
 									}
 									
@@ -357,6 +381,15 @@ public class AudioSender extends Thread{
 
 	public void setUseGsm(boolean useGsm) {
 		this.useGsm = useGsm;
+	}
+
+	/*public int getRtt() {
+		return rtt;
+	}*/
+
+
+	public void calcPackageMillis(int rtt) {
+		packageMillis = rtt*2+100;
 	}
 
 	private Handler errorHandler = new Handler()

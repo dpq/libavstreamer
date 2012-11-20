@@ -6,7 +6,7 @@ import org.apache.http.HttpResponse;
 
 import ru.glavbot.customLogger.AVLogger;
 
-import android.util.Log;
+//import android.util.Log;
 
 public class ReturnEntityConnectionRunner extends AbstractConnectionRunner {
 

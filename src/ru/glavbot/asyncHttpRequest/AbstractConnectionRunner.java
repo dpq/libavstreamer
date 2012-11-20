@@ -36,7 +36,7 @@ abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,Asyn
 			try {
 				response.getEntity().consumeContent();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				//e.printStackTrace();
 			} 
 
@@ -66,8 +66,8 @@ abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,Asyn
 		request = params[0];
 		HttpClient client = owner.getClient();
 		HttpParams p =client.getParams();
-		HttpConnectionParams.setSoTimeout(client.getParams(), request.getTimeout());
-		HttpConnectionParams.setConnectionTimeout(client.getParams(), request.getTimeout());
+		HttpConnectionParams.setSoTimeout(p, request.getTimeout());
+		HttpConnectionParams.setConnectionTimeout(p, request.getTimeout());
 		
 		AsyncRequestResponse asyncResponce=null;
 		try {
@@ -115,7 +115,7 @@ abstract class AbstractConnectionRunner extends AsyncTask<ConnectionRequest,Asyn
 					consumeCurrentResponce();
 					
 				} catch (IllegalStateException e1) {
-					// TODO Auto-generated catch block
+					
 					AVLogger.e("","",e1);
 					
 				} 
