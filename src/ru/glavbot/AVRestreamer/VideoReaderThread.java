@@ -215,7 +215,7 @@ public class VideoReaderThread extends Thread {
 
 		Message msg = mChildHandler.obtainMessage(START_VIDEO);
 		mChildHandler.sendMessage(msg);
-		AVLogger.v("avatar audio in","internal start");
+		AVLogger.v("avatar video in","internal start");
 	}
 
 	public void stopWork() {
@@ -228,7 +228,7 @@ public class VideoReaderThread extends Thread {
 		Message msg = mChildHandler.obtainMessage(STOP_VIDEO);
 		mChildHandler.removeMessages(START_VIDEO);
 		mChildHandler.sendMessageAtFrontOfQueue(msg);
-		AVLogger.v("avatar audio in","internal stop");
+		AVLogger.v("avatar video in","internal stop");
 	}
 
 	Handler mChildHandler;
@@ -299,9 +299,9 @@ public class VideoReaderThread extends Thread {
 						
 						OutputStream s = socket.getOutputStream();
 						String ident =  getToken();
-						
+						//TODO - fix
 						String header = 	  String.format(
-											  "GET /restreamer?oid=%s&imagetag=anonym HTTP/1.1"
+											  "GET /restreamer?oid=%s&imagetag=vader HTTP/1.1"
 											  +eol +"Server: %s:%d"+eol
 											  +"User-Agent: avatar/0.2"+eol  +eol ,
 											 ident  ,host,port);

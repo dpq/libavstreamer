@@ -25,6 +25,10 @@ import ru.glavbot.gsmfr.Gsm;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder.AudioSource;
+import android.media.audiofx.AcousticEchoCanceler;
+import android.media.audiofx.AutomaticGainControl;
+import android.media.audiofx.NoiseSuppressor;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -130,7 +134,7 @@ public class AudioSender extends Thread{
 	        //	boolean isRunning = false;
 	        	Encoder encoder = new Encoder();
 	        	byte[] gsm = new byte[Gsm.GSM_SAMPLE_SIZE];
-	        	
+	        	//AcousticEchoCanceler  acousticEchoCanceler;
 	        	
 	        	Socket socket = null;
 	            private boolean isPlaying = false;        	
@@ -149,8 +153,38 @@ public class AudioSender extends Thread{
 					bufferSize=bufferSize<CHUNK_SIZE_SHORT?CHUNK_SIZE_SHORT:bufferSize;
 			        is.mark(CHUNK_SIZE_FLOAT*4);
 				    recorder = new AudioRecord(AudioSource.VOICE_COMMUNICATION, SAMPLE_RATE,
-			                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
+			                    AudioFormat.CHANNEL_IN_MONO,
 			                    AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+				    
+				    boolean isAvailable;
+				    if(Build.VERSION.SDK_INT>=16)
+				    {
+					    	AVLogger.e("AEC", AcousticEchoCanceler.isAvailable()?"AEC ON":"AEC OFF");
+					    	isAvailable = AcousticEchoCanceler.isAvailable(); 
+						if (isAvailable) { 
+						     AcousticEchoCanceler aec = AcousticEchoCanceler.create(recorder.getAudioSessionId());
+						     if(!aec.getEnabled())
+						    	 aec.setEnabled(true); 
+						     AVLogger.i("AEC", " AEC enabled : " + aec.getEnabled() + " has control " + aec.hasControl()); 
+						}
+				    
+						isAvailable = AutomaticGainControl.isAvailable(); 
+						if(isAvailable)
+						{
+							AutomaticGainControl agc = AutomaticGainControl.create(recorder.getAudioSessionId());
+						     if(!agc.getEnabled())
+						    	 agc.setEnabled(true); 
+						     AVLogger.i("AGC", " AGC enabled : " + agc.getEnabled() + " has control " + agc.hasControl()); 
+						}
+						isAvailable = NoiseSuppressor.isAvailable();
+						if (isAvailable) { 
+							NoiseSuppressor ns = NoiseSuppressor.create(recorder.getAudioSessionId());
+						     if(!ns.getEnabled())
+						    	 ns.setEnabled(true); 
+						     AVLogger.i("NS", " NS enabled : " + ns.getEnabled() + " has control " + ns.hasControl()); 
+						}
+				    }
+					
 	            }
 	            
 	            public void handleMessage(Message msg) {

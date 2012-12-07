@@ -114,7 +114,7 @@ public class AudioReceiver extends Thread {
 				private int bufferSize;
 				{
 					bufferSize = AudioTrack.getMinBufferSize(SAMPLE_RATE,
-							AudioFormat.CHANNEL_CONFIGURATION_MONO,
+							AudioFormat.CHANNEL_OUT_MONO,
 							AudioFormat.ENCODING_PCM_16BIT);
 					bufferSize = CHUNK_SIZE_BASE > bufferSize ? CHUNK_SIZE_BASE
 							: bufferSize;
