@@ -26,6 +26,7 @@ public class VideoReaderThread extends Thread {
 	private String host;
 	private int port;
 	private String token;
+	private String tag="anonym"; 
 	private static final String eol = "\r\n";
 	
 	private static final int STD_DELAY = 1000;
@@ -37,7 +38,7 @@ public class VideoReaderThread extends Thread {
     private final byte[] EOL_MARKER = { (byte)0x0D,(byte) 0x0A };
     protected byte[] BOUNDARY = {'-','-','b','o','u','n','d','a','r','y','d','o','n','o','t','c','r','o','s','s',(byte)0x0D,(byte) 0x0A};
     private final static int HEADER_MAX_LENGTH = 100;
-    private final static int JPEG_MAX_LENGTH = 400000;
+    private final static int JPEG_MAX_LENGTH = 4000000;
     private final static int FRAME_MAX_LENGTH = JPEG_MAX_LENGTH + HEADER_MAX_LENGTH;
     private int mContentLength = -1;
     private static final String  BOUNDARY_HEADER="boundary=";
@@ -301,10 +302,10 @@ public class VideoReaderThread extends Thread {
 						String ident =  getToken();
 						//TODO - fix
 						String header = 	  String.format(
-											  "GET /restreamer?oid=%s&imagetag=vader HTTP/1.1"
+											  "GET /restreamer?oid=%s&imagetag=%s HTTP/1.1"
 											  +eol +"Server: %s:%d"+eol
 											  +"User-Agent: avatar/0.2"+eol  +eol ,
-											 ident  ,host,port);
+											 ident, tag, host, port);
 						s.write(header.getBytes());
 						videoStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 						String dataToGet=(eol+eol);
@@ -413,6 +414,13 @@ public class VideoReaderThread extends Thread {
 	public void setToken(String token) {
 		this.token = token;
 	};
+
+	public String getTag() {
+		return tag;
+	}
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
 
 	private Handler errorHandler = new Handler() {
 		@Override

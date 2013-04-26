@@ -17,6 +17,16 @@ public class VideoReceiver {
 	VideoReaderThread reader;
 	VideoDrawerThread drawer;
 	
+	public String getTag()
+	{
+		return reader.getTag();
+	}
+	
+	public void setTag(String tag)
+	{
+         reader.setTag(tag);
+	}
+	
 	public void setAddress(String host, int videoPort)
 	{
 		
